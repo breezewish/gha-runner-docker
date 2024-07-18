@@ -41,7 +41,7 @@ RUN \
 
 export DEBIAN_FRONTEND=noninteractive ARCH=`dpkg --print-architecture`
 apt-get install -y --no-install-recommends \
-    curl wget gnupg git software-properties-common
+    curl wget git
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 add-apt-repository "deb [arch=${ARCH}] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/ubuntu jammy stable"
