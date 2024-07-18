@@ -7,8 +7,6 @@
 # A recent CMake
 FROM gha-runner-base AS builder-cmake
 
-WORKDIR /
-
 ARG CMAKE_VERSION=3.29.7
 RUN <<EOF
 
