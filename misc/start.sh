@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo Entrypoint Arguments:
+echo $@
+
 cd /home/docker/actions-runner || exit 1
 
 ARCH=`dpkg --print-architecture`
