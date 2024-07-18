@@ -25,6 +25,8 @@ chmod +x llvm.sh
 sudo ./llvm.sh 17 all -m https://mirrors.tuna.tsinghua.edu.cn/llvm-apt
 rm llvm.sh
 
+echo "export PATH=/usr/lib/llvm-17/bin:$PATH" >> /home/docker/.profile
+
 EOF
 
 # ==============================
