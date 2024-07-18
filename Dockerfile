@@ -52,8 +52,8 @@ EOF
 # Allow sudo without password
 RUN <<EOF
 
-echo ubuntu ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/ubuntu
-chmod 0440 /etc/sudoers.d/ubuntu
+echo docker ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/docker
+chmod 0440 /etc/sudoers.d/docker
 
 EOF
 
