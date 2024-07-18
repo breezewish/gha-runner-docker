@@ -11,6 +11,7 @@ FILENAME=actions-runner-linux-${ARCH}-${RUNNER_VERSION}.tar.gz
 curl -O -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/${FILENAME}
 tar xzf ./$FILENAME
 chown -R docker /home/docker
+rm ./$FILENAME
 
 EOF
 

@@ -62,16 +62,13 @@ EOF
 
 # ==============================
 # Others
-RUN <<EOF
-
-ccache -M 10G
-
-EOF
+RUN ccache -M 10G
 
 # ==============================
 # GHA Runner
 # Use COPY instead of FROM gha-runner to keep cache valid when updating gha-runner version.
 
-COPY --chown=docker --from=gha-runner /home/docker/actions-runner /home/docker/actions-runner
+RUN chown -R docker /home/docker
+COPY --chown=docker:docker --from=gha-runner /home/docker/actions-runner /home/docker/actions-runner
 USER docker
 ENTRYPOINT ["./start.sh"]
