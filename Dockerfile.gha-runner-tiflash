@@ -67,4 +67,4 @@ RUN ccache -M 10G
 # Use COPY instead of FROM gha-runner to keep cache valid when updating gha-runner version.
 
 COPY --chown=docker:docker --from=gha-runner /home/docker/actions-runner /home/docker/actions-runner
-ENTRYPOINT ["./start.sh"]
+ENTRYPOINT ["/bin/bash", "-l", "-c", "./start.sh"]
