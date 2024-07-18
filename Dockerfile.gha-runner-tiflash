@@ -3,6 +3,31 @@
 # This Dockerfile prepares necessary dependencies for building TiFlash, based on Ubuntu 22 image.
 # TiFlash build dependencies and GHA runners runs in the same container.
 
+# ==============================
+# A recent CMake
+FROM gha-runner-base AS builder-cmake
+
+WORKDIR /
+
+ARG CMAKE_VERSION=3.29.7
+RUN <<EOF
+
+wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-$(uname -m).tar.gz
+tar xf cmake-${CMAKE_VERSION}-linux-$(uname -m).tar.gz
+sudo mv cmake-${CMAKE_VERSION}-linux-$(uname -m) /cmake-artifacts
+
+# Remove unused things
+sudo rm -rf \
+    /cmake-artifacts/doc \
+    /cmake-artifacts/man \
+    /cmake-artifacts/bin/cmake-gui \
+    /cmake-artifacts/bin/ccmake
+
+EOF
+
+# ==============================
+# GHA Runner for TiFlash
+
 FROM gha-runner-base
 
 RUN \
@@ -37,13 +62,8 @@ COPY --chown=docker:docker --from=gha-runner /home/docker/actions-runner /home/d
 
 # ==============================
 # CMake
-RUN \
-    --mount=type=cache,sharing=locked,target=/var/cache/apt \
-    --mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
 
-sudo apt-get install -y cmake
-
-EOF
+COPY --from=builder-cmake /cmake-artifacts /usr/local/
 
 # ==============================
 # Some compile dependencies
