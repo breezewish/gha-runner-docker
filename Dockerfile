@@ -49,6 +49,14 @@ chown -R docker /home/docker
 
 EOF
 
+# Allow sudo without password
+RUN <<EOF
+
+echo ubuntu ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/ubuntu
+chmod 0440 /etc/sudoers.d/ubuntu
+
+EOF
+
 COPY misc/start.sh /home/docker/actions-runner/start.sh
 
 # since the config and run script for actions are not allowed to be run by root,
