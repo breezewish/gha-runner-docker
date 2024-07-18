@@ -8,3 +8,6 @@ rustflags = ["-C", "link-arg=-fuse-ld=lld", "-C", "link-arg=-Wl,-Bsymbolic"]
 
 [profile.release]
 rpath = true
+
+[term]
+color = "always" # GHA supports colors
