@@ -73,6 +73,8 @@ RUN \
 # FIXME: Currently TiFlash requires system's curl
 sudo apt-get install -y libcurl4-openssl-dev
 
+sudo apt-get install -y make
+
 EOF
 
 # ==============================
