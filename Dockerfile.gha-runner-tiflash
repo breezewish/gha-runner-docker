@@ -63,6 +63,9 @@ mkdir -p /home/docker/.cargo/
 
 EOF
 
+# Override default Rust linkers. Cargo does not respect CC env variables at all.
+COPY --chown=docker:docker misc/cargo-config.toml /home/docker/.cargo/config
+
 # ==============================
 # Create directories to cache after image is restarted
 RUN <<EOF
