@@ -2,7 +2,13 @@
 
 set -euo pipefail
 
-echo "Github Runner for $(hostname)"
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 <org> <repo> <token>"
+    exit 1
+fi
 
-docker build -t gha-runner .
-docker run -ti --name=gha-runner-$1-$2 -d --restart=always -v /var/run/docker.sock:/var/run/docker.sock gha-runner $1 $2 $3 "$(hostname)"
+if [[ $2 == "tiflash-cse" ]]; then
+    ./run.tiflash.sh "$@"
+else
+    ./run.other.sh "$@"
+fi

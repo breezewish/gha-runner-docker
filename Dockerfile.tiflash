@@ -1,0 +1,61 @@
+# syntax=docker/dockerfile:1
+
+# This Dockerfile prepares necessary dependencies for building TiFlash, based on Ubuntu 22 image.
+# TiFlash build dependencies and GHA runners runs in the same container.
+
+FROM gha-runner AS gha-runner-base
+
+ARG TARGETARCH
+
+RUN \
+    --mount=type=cache,sharing=locked,target=/var/cache/apt \
+    --mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
+
+sudo apt-get install -y curl wget ccache ninja-build git zsh
+
+EOF
+
+# ==============================
+# LLVM 17
+RUN \
+    --mount=type=cache,sharing=locked,target=/var/cache/apt \
+    --mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
+
+sudo apt-get install -y lsb-release wget software-properties-common gnupg
+wget https://mirrors.tuna.tsinghua.edu.cn/llvm-apt/llvm.sh
+chmod +x llvm.sh
+sudo ./llvm.sh 17 all -m https://mirrors.tuna.tsinghua.edu.cn/llvm-apt
+rm llvm.sh
+
+EOF
+
+# ==============================
+# CMake
+RUN \
+    --mount=type=cache,sharing=locked,target=/var/cache/apt \
+    --mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
+
+sudo apt-get install -y cmake
+
+EOF
+
+# ==============================
+# Rust
+RUN <<EOF
+
+curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain none
+mkdir -p /home/docker/.cargo/
+
+EOF
+
+# ==============================
+# Create directories to cache after image is restarted
+RUN <<EOF
+
+mkdir -p /home/docker/.cargo/registry \
+    /home/docker/.cargo/git \
+    /home/docker/.rustup/toolchains \
+    /home/docker/.cache/ccache \
+    /home/docker/actions-runner/_work/tiflash-cse
+
+EOF
