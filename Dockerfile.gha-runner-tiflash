@@ -14,7 +14,7 @@ sudo apt-get install -y curl wget ccache ninja-build git zsh
 EOF
 
 # ==============================
-# LLVM 17
+# LLVM 17 (Large)
 RUN \
     --mount=type=cache,sharing=locked,target=/var/cache/apt \
     --mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
@@ -28,12 +28,29 @@ rm llvm.sh
 EOF
 
 # ==============================
+# GHA Runner (Large)
+# Use COPY instead of FROM gha-runner to keep cache valid when updating gha-runner version.
+
+COPY --chown=docker:docker --from=gha-runner /home/docker/actions-runner /home/docker/actions-runner
+
+# ==============================
 # CMake
 RUN \
     --mount=type=cache,sharing=locked,target=/var/cache/apt \
     --mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
 
 sudo apt-get install -y cmake
+
+EOF
+
+# ==============================
+# Some compile dependencies
+RUN \
+--mount=type=cache,sharing=locked,target=/var/cache/apt \
+--mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
+
+# FIXME: Currently TiFlash requires system's curl
+sudo apt-get install -y libcurl4-openssl-dev
 
 EOF
 
@@ -61,9 +78,3 @@ EOF
 # ==============================
 # Others
 RUN ccache -M 10G
-
-# ==============================
-# GHA Runner
-# Use COPY instead of FROM gha-runner to keep cache valid when updating gha-runner version.
-
-COPY --chown=docker:docker --from=gha-runner /home/docker/actions-runner /home/docker/actions-runner
