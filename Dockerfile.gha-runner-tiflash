@@ -3,7 +3,7 @@
 # This Dockerfile prepares necessary dependencies for building TiFlash, based on Ubuntu 22 image.
 # TiFlash build dependencies and GHA runners runs in the same container.
 
-FROM gha-runner
+FROM gha-runner-base
 
 ARG TARGETARCH
 
@@ -68,5 +68,10 @@ ccache -M 10G
 
 EOF
 
-# set the entrypoint to the start.sh script
+# ==============================
+# GHA Runner
+# Use COPY instead of FROM gha-runner to keep cache valid when updating gha-runner version.
+
+COPY --from=gha-runner /home/docker/actions-runner /home/docker/actions-runner
+USER docker
 ENTRYPOINT ["./start.sh"]
