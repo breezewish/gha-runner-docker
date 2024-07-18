@@ -19,13 +19,13 @@ if [[ $2 == "tiflash-cse" ]]; then
         -v tiflash_ccache:/home/docker/.cache/ccache \
         -v tiflash_git:/home/docker/actions-runner/_work/tiflash-cse \
         hub.pingcap.net/sunxiaoguang/serverless/gha-runner:tiflash-latest \
-        ./start.sh $1 $2 $3 "$(hostname)"
+        /bin/bash -l -c "./start.sh $1 $2 $3 $(hostname)"
 
 else
 
     docker run -ti --name=gha-runner-$1-$2 -d --restart=always \
         -v /var/run/docker.sock:/var/run/docker.sock \
         hub.pingcap.net/sunxiaoguang/serverless/gha-runner:latest \
-        ./start.sh $1 $2 $3 "$(hostname)"
+        /bin/bash -l -c "./start.sh $1 $2 $3 $(hostname)"
 
 fi

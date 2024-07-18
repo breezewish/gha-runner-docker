@@ -15,5 +15,3 @@ rm ./$FILENAME
 EOF
 
 COPY --chown=docker:docker misc/start.sh /home/docker/actions-runner/start.sh
-ENTRYPOINT ["/bin/bash", "-l", "-c"]
-CMD ["./start.sh"]
