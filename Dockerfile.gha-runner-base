@@ -25,7 +25,7 @@ groupadd -g ${DOCKER_GID} docker
 useradd -m docker -g docker
 echo docker ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/docker
 chmod 0440 /etc/sudoers.d/docker
-mkdir -p actions-runner
+mkdir -p /home/docker/actions-runner
 chown -R docker /home/docker
 
 EOF
