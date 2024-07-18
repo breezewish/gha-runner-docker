@@ -39,14 +39,19 @@ RUN \
     --mount=type=cache,sharing=locked,target=/var/cache/apt \
     --mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
 
-export DEBIAN_FRONTEND=noninteractive ARCH=`dpkg --print-architecture`
-apt-get install -y --no-install-recommends \
-    curl wget git gnupg
+apt-get install -y \
+    curl wget git gnupg ca-certificates
 
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-add-apt-repository "deb [arch=${ARCH}] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/ubuntu jammy stable"
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+chmod a+r /etc/apt/keyrings/docker.gpg
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/ubuntu \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  tee /etc/apt/sources.list.d/docker.list > /dev/null
+
 apt-get update -y
-apt-get install -y docker-ce docker-ce-cli containerd.io
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin
 
 EOF
 
