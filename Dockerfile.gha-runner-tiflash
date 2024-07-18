@@ -10,8 +10,6 @@ FROM gha-runner-base AS builder-cmake
 ARG CMAKE_VERSION=3.29.7
 RUN <<EOF
 
-set -euo pipefail
-
 wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-$(uname -m).tar.gz
 tar xf cmake-${CMAKE_VERSION}-linux-$(uname -m).tar.gz
 sudo mv cmake-${CMAKE_VERSION}-linux-$(uname -m) /cmake-artifacts
