@@ -72,6 +72,6 @@ EOF
 # GHA Runner
 # Use COPY instead of FROM gha-runner to keep cache valid when updating gha-runner version.
 
-COPY --from=gha-runner /home/docker/actions-runner /home/docker/actions-runner
+COPY --chown=docker --from=gha-runner /home/docker/actions-runner /home/docker/actions-runner
 USER docker
 ENTRYPOINT ["./start.sh"]
