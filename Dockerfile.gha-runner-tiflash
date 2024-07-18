@@ -9,14 +9,6 @@ FROM gha-runner-base AS builder-cmake
 
 ARG CMAKE_VERSION=3.29.7
 
-RUN \
-    --mount=type=cache,sharing=locked,target=/var/cache/apt \
-    --mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
-
-sudo apt-get install -y wget
-
-EOF
-
 RUN <<EOF
 
 wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-$(uname -m).tar.gz
