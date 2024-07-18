@@ -60,5 +60,13 @@ mkdir -p /home/docker/.cargo/registry \
 
 EOF
 
+# ==============================
+# Others
+RUN <<EOF
+
+ccache -M 10G
+
+EOF
+
 # set the entrypoint to the start.sh script
 ENTRYPOINT ["./start.sh"]
