@@ -9,5 +9,5 @@ docker buildx build --progress=plain -t gha-runner-tiflash -f Dockerfile.gha-run
 docker image tag gha-runner         hub.pingcap.net/sunxiaoguang/serverless/gha-runner:latest
 docker image tag gha-runner-tiflash hub.pingcap.net/sunxiaoguang/serverless/gha-runner:tiflash-latest
 
-docker push hub.pingcap.net/sunxiaoguang/serverless/gha-runner:latest
-docker push hub.pingcap.net/sunxiaoguang/serverless/gha-runner:tiflash-latest
+# docker push hub.pingcap.net/sunxiaoguang/serverless/gha-runner:latest
+# docker push hub.pingcap.net/sunxiaoguang/serverless/gha-runner:tiflash-latest
