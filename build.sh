@@ -2,12 +2,14 @@
 
 set -euo pipefail
 
-docker buildx build --progress=plain -t gha-runner-base -f Dockerfile.gha-runner-base .
-docker buildx build --progress=plain -t gha-runner -f Dockerfile.gha-runner .
-docker buildx build --progress=plain -t gha-runner-tiflash -f Dockerfile.gha-runner-tiflash .
+ARCH=$(uname -p)
 
-docker image tag gha-runner         hub.pingcap.net/sunxiaoguang/serverless/gha-runner:latest
-docker image tag gha-runner-tiflash hub.pingcap.net/sunxiaoguang/serverless/gha-runner:tiflash-latest
+docker buildx build --progress=plain -t gha-runner-base --load -f Dockerfile.gha-runner-base .
+docker buildx build --progress=plain -t gha-runner --load -f Dockerfile.gha-runner .
+docker buildx build --progress=plain -t gha-runner-tiflash --load -f Dockerfile.gha-runner-tiflash .
 
-# docker push hub.pingcap.net/sunxiaoguang/serverless/gha-runner:latest
-# docker push hub.pingcap.net/sunxiaoguang/serverless/gha-runner:tiflash-latest
+docker image tag gha-runner         hub.pingcap.net/sunxiaoguang/serverless/gha-runner:$ARCH-latest
+docker image tag gha-runner-tiflash hub.pingcap.net/sunxiaoguang/serverless/gha-runner:$ARCH-tiflash-latest
+
+# docker push hub.pingcap.net/sunxiaoguang/serverless/gha-runner:$ARCH-latest
+# docker push hub.pingcap.net/sunxiaoguang/serverless/gha-runner:$ARCH-tiflash-latest
