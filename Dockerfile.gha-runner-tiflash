@@ -103,4 +103,10 @@ EOF
 
 # ==============================
 # Others
-RUN ccache -M 10G
+
+RUN <<EOF
+
+ccache -M 10G
+ccache --set-config=compiler_check=content
+
+EOF
