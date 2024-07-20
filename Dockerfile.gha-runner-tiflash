@@ -25,9 +25,13 @@ sudo rm -rf \
 EOF
 
 # ==============================
+# ==============================
+# ==============================
 # GHA Runner for TiFlash
 
 FROM gha-runner-base
+
+ARG TARGETARCH
 
 RUN \
     --mount=type=cache,sharing=locked,target=/var/cache/apt \
@@ -88,6 +92,16 @@ EOF
 
 # Override default Rust linkers. Cargo does not respect CC env variables at all.
 COPY --chown=docker:docker misc/cargo-config.toml /home/docker/.cargo/config
+
+# ==============================
+# Minio. TiFlash Actions uses minio client for passing artifacts.
+RUN <<EOF
+
+wget https://dl.min.io/client/mc/release/linux-$TARGETARCH/mc
+chmod +x mc
+sudo mv mc /usr/local/bin/
+
+EOF
 
 # ==============================
 # Create directories to cache after image is restarted
