@@ -1,0 +1,58 @@
+# syntax=docker/dockerfile:1
+
+# The base image, GHA runners may be updated frequently, so this image only contains dependencies of GHA runner.
+FROM ubuntu:22.04
+
+ARG DOCKER_GID="121"
+
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
+RUN \
+    --mount=type=cache,sharing=locked,target=/var/cache/apt \
+    --mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
+
+export DEBIAN_FRONTEND=noninteractive
+sed -i s@/archive.ubuntu.com/@/apt.ksyun.cn/@g /etc/apt/sources.list
+sed -i s@/ports.ubuntu.com/@/apt.ksyun.cn/@g /etc/apt/sources.list
+sed -i s@/security.ubuntu.com/@/apt.ksyun.cn/@g /etc/apt/sources.list
+apt-get update -y
+apt-get upgrade -y
+apt-get install -y sudo
+
+EOF
+
+RUN <<EOF
+
+groupadd -g ${DOCKER_GID} docker
+useradd -m docker -g docker
+echo docker ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/docker
+chmod 0440 /etc/sudoers.d/docker
+mkdir -p /home/docker/actions-runner
+chown -R docker /home/docker
+
+EOF
+
+WORKDIR /home/docker/actions-runner
+
+# Docker
+RUN \
+    --mount=type=cache,sharing=locked,target=/var/cache/apt \
+    --mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
+
+apt-get install -y \
+    curl wget git gnupg ca-certificates
+
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+chmod a+r /etc/apt/keyrings/docker.gpg
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/ubuntu \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+apt-get update -y
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin
+
+EOF
+
+USER docker

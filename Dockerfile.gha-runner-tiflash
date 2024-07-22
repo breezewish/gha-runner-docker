@@ -1,0 +1,126 @@
+# syntax=docker/dockerfile:1
+
+# This Dockerfile prepares necessary dependencies for building TiFlash, based on Ubuntu 22 image.
+# TiFlash build dependencies and GHA runners runs in the same container.
+
+# ==============================
+# A recent CMake
+FROM gha-runner-base AS builder-cmake
+
+ARG CMAKE_VERSION=3.29.7
+
+RUN <<EOF
+
+wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-$(uname -m).tar.gz
+tar xf cmake-${CMAKE_VERSION}-linux-$(uname -m).tar.gz
+sudo mv cmake-${CMAKE_VERSION}-linux-$(uname -m) /cmake-artifacts
+
+# Remove unused things
+sudo rm -rf \
+    /cmake-artifacts/doc \
+    /cmake-artifacts/man \
+    /cmake-artifacts/bin/cmake-gui \
+    /cmake-artifacts/bin/ccmake
+
+EOF
+
+# ==============================
+# ==============================
+# ==============================
+# GHA Runner for TiFlash
+
+FROM gha-runner-base
+
+ARG TARGETARCH
+
+RUN \
+    --mount=type=cache,sharing=locked,target=/var/cache/apt \
+    --mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
+
+sudo apt-get install -y curl wget ccache ninja-build git zsh
+
+EOF
+
+# ==============================
+# LLVM 17 (Large)
+RUN \
+    --mount=type=cache,sharing=locked,target=/var/cache/apt \
+    --mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
+
+sudo apt-get install -y lsb-release wget software-properties-common gnupg
+wget https://mirrors.tuna.tsinghua.edu.cn/llvm-apt/llvm.sh
+chmod +x llvm.sh
+sudo ./llvm.sh 17 all -m https://mirrors.tuna.tsinghua.edu.cn/llvm-apt
+rm llvm.sh
+
+echo "export PATH=/usr/lib/llvm-17/bin:$PATH" >> /home/docker/.profile
+
+EOF
+
+# ==============================
+# GHA Runner (Large)
+# Use COPY instead of FROM gha-runner to keep cache valid when updating gha-runner version.
+
+COPY --chown=docker:docker --from=gha-runner /home/docker/actions-runner /home/docker/actions-runner
+
+# ==============================
+# CMake
+
+COPY --from=builder-cmake /cmake-artifacts /usr/local/
+
+# ==============================
+# Some compile dependencies
+RUN \
+--mount=type=cache,sharing=locked,target=/var/cache/apt \
+--mount=type=cache,sharing=locked,target=/var/lib/apt <<EOF
+
+# FIXME: Currently TiFlash requires system's curl
+sudo apt-get install -y libcurl4-openssl-dev
+
+sudo apt-get install -y make
+
+EOF
+
+# ==============================
+# Rust
+RUN <<EOF
+
+curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain none
+mkdir -p /home/docker/.cargo/
+
+EOF
+
+# Override default Rust linkers. Cargo does not respect CC env variables at all.
+COPY --chown=docker:docker misc/cargo-config.toml /home/docker/.cargo/config
+
+# ==============================
+# Minio. TiFlash Actions uses minio client for passing artifacts.
+RUN <<EOF
+
+wget https://dl.min.io/client/mc/release/linux-$TARGETARCH/mc
+chmod +x mc
+sudo mv mc /usr/local/bin/
+
+EOF
+
+# ==============================
+# Create directories to cache after image is restarted
+RUN <<EOF
+
+mkdir -p /home/docker/.cargo/registry \
+    /home/docker/.cargo/git \
+    /home/docker/.rustup/toolchains \
+    /home/docker/.cache/ccache \
+    /home/docker/actions-runner/_work/tiflash-cse
+
+EOF
+
+# ==============================
+# Others
+
+RUN <<EOF
+
+ccache -M 10G
+ccache --set-config=compiler_check=content
+
+EOF
